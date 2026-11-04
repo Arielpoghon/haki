@@ -1,0 +1,20 @@
+# secrets — never commit
+.env
+chain/.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# node (chain/ only)
+chain/node_modules/
+
+# run artifacts
+audit/trail.jsonl
+audit/*.jsonl
+
+# os / editor
+.DS_Store
+*.swp

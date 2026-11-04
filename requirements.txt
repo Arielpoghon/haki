@@ -1,0 +1,7 @@
+# Haki — pinned dependencies (tested on Python 3.12)
+fastapi==0.128.0
+uvicorn==0.44.0
+pydantic==2.12.5
+PyYAML==6.0.3
+pytest==9.0.2
+httpx==0.28.1
