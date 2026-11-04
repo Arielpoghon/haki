@@ -1,9 +1,10 @@
 """Haki — a compliance agent for tokenized real-world assets (RWA).
 
-M0 package layout:
-- schemas.py      — pydantic models (assets, wallets, rules, screening results)
+Package layout:
+- schemas.py      — pydantic models (assets, wallets, rules, runs, proofs)
 - rules_engine.py — deterministic verdict engine (the source of truth)
-
-Coming in M1-M3: agent.py (tool pipeline), tools.py, attestation.py, main.py
-(FastAPI + static dashboard).
+- tools.py        — agent tools: data loads + audit trail (audit/trail.jsonl)
+- agent.py        — orchestrator: tool pipeline + rationale (LLM optional)
+- attestation.py  — proof bridge: simulated by default, EAS when configured
+- main.py         — FastAPI app + plain-HTML dashboard (static/)
 """

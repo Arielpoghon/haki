@@ -56,9 +56,11 @@ demo still runs end-to-end with no LLM key at all (deterministic mode).
       EU-MiCA-lite), deterministic rules engine, full 6×5 verdict matrix green
 - [x] EAS attestation scripts for Base Sepolia, API verified against the
       official SDK types (day-1 drill ready — see `chain/README.md`)
-- [ ] M1: wallet screening tool, API surface
-- [ ] M2: agent pipeline + audit trail + plain-HTML dashboard
-- [ ] M3: live attestation end-to-end
+- [x] **M2 (Nov 4):** agent pipeline (deterministic mode + optional LLM
+      rationale), audit trail persisted to `audit/trail.jsonl`, FastAPI API,
+      plain-HTML dashboard — **31 tests green**
+- [ ] M3: live attestation end-to-end (needs a faucet-funded testnet key —
+      the API already falls back to labeled SIMULATED proofs)
 
 ## Quick start
 
@@ -66,6 +68,8 @@ demo still runs end-to-end with no LLM key at all (deterministic mode).
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest -q     # the verdict matrix is the spec
+.venv/bin/uvicorn api.main:app --port 8000
+# dashboard: http://localhost:8000 · API docs: http://localhost:8000/docs
 ```
 
 Onchain attestation drill (optional, testnet only): see `chain/README.md`.
@@ -97,8 +101,14 @@ Unknown conditions or profiles **fail loud** — the engine never guesses.
 
 ```
 api/
-  schemas.py         # pydantic models (assets, wallets, rules, results)
+  schemas.py         # pydantic models (assets, wallets, rules, runs, proofs)
   rules_engine.py    # deterministic verdict engine (source of truth)
+  tools.py           # agent tools: load_* + audit trail (audit/trail.jsonl)
+  agent.py           # orchestrator: tool pipeline + rationale (LLM optional)
+  attestation.py     # proof bridge: simulated by default, EAS when configured
+  main.py            # FastAPI — the only backend, serves static/
+static/
+  index.html         # plain HTML dashboard — no framework, no build step
 rules/
   global.yaml        # sanctions, accreditation, wallet-risk baseline
   ke.yaml  za.yaml  eu_mica_lite.yaml
@@ -109,10 +119,21 @@ chain/
   package.json  .env.example  README.md
 tests/
   test_rules_engine.py    # the verdict matrix is the spec
+  test_api.py             # API surface, agent pipeline, audit trail
 conftest.py  requirements.txt  .env.example  .gitignore
 README.md  BUSINESS.md
-audit/               # run log (gitignored) — populated from M2
+audit/               # run log (gitignored) — every screening persists here
 ```
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/assets` | demo asset registry |
+| GET | `/api/v1/wallets` | demo wallets (no risk internals) |
+| GET | `/api/v1/rules` | all rule packs |
+| POST | `/api/v1/screen` | `{asset_id, wallet_label}` → verdict + rationale + audit trail + proof |
+| GET | `/api/v1/runs/{run_id}` | persisted audit steps for one run |
 
 ## License
 

@@ -123,3 +123,47 @@ class ScreeningResult(BaseModel):
     deny_reasons: list[str] = Field(default_factory=list)
     restrict_reasons: list[str] = Field(default_factory=list)
     evaluated_at: str  # ISO-8601 UTC
+
+
+class AuditStep(BaseModel):
+    """One recorded agent tool call. The audit trail is the run's receipt."""
+
+    seq: int
+    tool: str
+    at: str  # ISO-8601 UTC
+    detail: str
+    data: dict[str, Any] = Field(default_factory=dict)
+
+
+class Attestation(BaseModel):
+    """Proof that a verdict was recorded. SIMULATED until chain/.env is set."""
+
+    mode: str  # "simulated" | "onchain"
+    run_id: str
+    asset_id: str
+    wallet_label: str
+    wallet_address: str
+    verdict: Verdict
+    uid: str  # attestation UID (simulated = deterministic payload hash)
+    schema_uid: str = ""
+    explorer_url: str = ""
+    easscan_url: str = ""
+    note: str = ""
+
+
+class ComplianceRun(BaseModel):
+    """The full agent output for one screening: verdict + reasoning + proof."""
+
+    run_id: str
+    agent_mode: str  # "deterministic" | "llm"
+    asset: Asset
+    wallet: Wallet
+    screening: ScreeningResult
+    rationale: str
+    audit_trail: list[AuditStep]
+    attestation: Attestation
+
+
+class ScreenRequest(BaseModel):
+    asset_id: str
+    wallet_label: str
