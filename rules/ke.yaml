@@ -1,0 +1,26 @@
+# Haki — Kenya (KE) rules pack, CMA framing.
+# Applies to assets whose rules_profile is KE. Demo profile — not legal advice.
+
+jurisdiction: KE
+regulator: CMA (Capital Markets Authority, Kenya)
+rules:
+  - id: KE-DEBT-JUR
+    when:
+      asset_type: [debt_security, infra_bond]
+    require:
+      holder_jurisdictions: [KE, ZA]
+    on_fail: DENY
+
+  - id: KE-AGRI-JUR
+    when:
+      asset_type: [agri_invoice]
+    require:
+      holder_jurisdictions: [KE]
+    on_fail: DENY
+
+  - id: KE-CARBON-US
+    when:
+      us_persons_excluded: true
+      us_person: true
+    action: RESTRICT
+    note: US persons excluded from this issuance pending Reg S review — enhanced due diligence

@@ -1,0 +1,12 @@
+# Haki — South Africa (ZA) rules pack, FSCA framing.
+# Applies to assets whose rules_profile is ZA. Demo profile — not legal advice.
+
+jurisdiction: ZA
+regulator: FSCA (Financial Sector Conduct Authority, South Africa)
+rules:
+  - id: ZA-COMMODITY-JUR
+    when:
+      asset_type: [commodity_receipt]
+    require:
+      holder_jurisdictions: [KE, ZA]
+    on_fail: DENY

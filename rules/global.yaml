@@ -1,0 +1,34 @@
+# Haki — GLOBAL baseline rules pack.
+# Applied to EVERY screening, before the asset's jurisdiction pack.
+# The rules engine is the source of truth for verdicts; these YAML files are
+# the policy layer. Demo profile — not legal advice.
+
+jurisdiction: GLOBAL
+regulator: cross-jurisdiction baseline (sanctions, accreditation, wallet risk)
+rules:
+  - id: GLOBAL-SANCTIONS
+    when:
+      always: true
+    require:
+      not_sanctioned: true
+    on_fail: DENY
+
+  - id: GLOBAL-ACCRED
+    when:
+      accreditation_required: true
+    require:
+      accredited: true
+    on_fail: DENY
+
+  - id: RISK-EDD
+    when:
+      risk_flags_present: [mixer_exposure]
+    action: RESTRICT
+    note: mixer exposure — enhanced due diligence, clears after manual review
+
+  - id: RISK-NEW-WALLET
+    when:
+      wallet_age_days_lt: 30
+      asset_type: [debt_security, land_title, agri_invoice, commodity_receipt, infra_bond]
+    action: RESTRICT
+    note: wallet younger than 30 days on a regulated instrument — KYC pending

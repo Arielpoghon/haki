@@ -1,0 +1,14 @@
+# Haki — EU (MiCA-lite) research pack.
+# Deliberately simplified; demonstrates that adding a jurisdiction = adding
+# one YAML file. Not legal advice.
+
+jurisdiction: EU
+regulator: simplified MiCA research profile (ESMA framing)
+rules:
+  - id: EU-MICA-T3
+    when:
+      asset_type: [debt_security, commodity_receipt]
+    require:
+      issuer_eu_authorized: true
+    on_fail: RESTRICT
+    note: issuer not EU-authorized — MiCA Title III marketing passport pending
