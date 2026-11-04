@@ -1,0 +1,16 @@
+{
+  "name": "haki-chain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Haki — EAS attestations on Base Sepolia (testnet only)",
+  "scripts": {
+    "wallet": "node wallet.mjs",
+    "schema": "node schema.mjs",
+    "attest": "node attest.mjs"
+  },
+  "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "2.10.0",
+    "ethers": "6.17.0"
+  }
+}
