@@ -1,0 +1,10 @@
+{
+  "source": "MOCK — demo fixture only. Not a real sanctions feed; do not use in production.",
+  "entries": [
+    {
+      "address": "0x5a4e7d0000000000000000000000000000000002",
+      "list": "MOCK-SDN",
+      "name": "Mock Sanctioned Entity 001 (demo)"
+    }
+  ]
+}

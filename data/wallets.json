@@ -1,0 +1,54 @@
+{
+  "wallets": [
+    {
+      "label": "CLEAN",
+      "address": "0xa11ce00000000000000000000000000000000001",
+      "jurisdiction": "KE",
+      "accredited": true,
+      "sanctioned": false,
+      "risk_flags": [],
+      "wallet_age_days": 730,
+      "us_person": false
+    },
+    {
+      "label": "SANCT",
+      "address": "0x5a4e7d0000000000000000000000000000000002",
+      "jurisdiction": "KE",
+      "accredited": false,
+      "sanctioned": true,
+      "risk_flags": ["sanctions_match"],
+      "wallet_age_days": 410,
+      "us_person": false
+    },
+    {
+      "label": "MIXER",
+      "address": "0x913e570000000000000000000000000000000003",
+      "jurisdiction": "KE",
+      "accredited": false,
+      "sanctioned": false,
+      "risk_flags": ["mixer_exposure"],
+      "wallet_age_days": 200,
+      "us_person": false
+    },
+    {
+      "label": "FRESH",
+      "address": "0xf2e5100000000000000000000000000000000004",
+      "jurisdiction": "KE",
+      "accredited": false,
+      "sanctioned": false,
+      "risk_flags": [],
+      "wallet_age_days": 1,
+      "us_person": false
+    },
+    {
+      "label": "US",
+      "address": "0x08e5500000000000000000000000000000000005",
+      "jurisdiction": "US",
+      "accredited": false,
+      "sanctioned": false,
+      "risk_flags": [],
+      "wallet_age_days": 300,
+      "us_person": true
+    }
+  ]
+}

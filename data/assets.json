@@ -1,0 +1,70 @@
+{
+  "assets": [
+    {
+      "id": "KE-TB-2030",
+      "name": "Tokenized Kenyan Treasury Bond 2030",
+      "asset_type": "debt_security",
+      "issuer": "Nairobi Digital Securities Ltd",
+      "rules_profile": "KE",
+      "accreditation_required": false,
+      "us_persons_excluded": false,
+      "issuer_eu_authorized": false,
+      "summary": "Fractional Kenyan government treasury bond, tokenized for onchain settlement."
+    },
+    {
+      "id": "NBO-LAND-0042",
+      "name": "Fractional Nairobi Land Title (Kilimani Plot 0042)",
+      "asset_type": "land_title",
+      "issuer": "Kilimani Ledger Ltd",
+      "rules_profile": "KE",
+      "accreditation_required": true,
+      "us_persons_excluded": false,
+      "issuer_eu_authorized": false,
+      "summary": "Fractional freehold interest in a Nairobi commercial plot, held in tokenized form."
+    },
+    {
+      "id": "CHY-CC-2027",
+      "name": "Chyulu Hills Carbon Credit Batch 2027",
+      "asset_type": "carbon_credit",
+      "issuer": "Chyulu Carbon Coop",
+      "rules_profile": "KE",
+      "accreditation_required": false,
+      "us_persons_excluded": true,
+      "issuer_eu_authorized": false,
+      "summary": "Verified carbon-credit batch from the Chyulu Hills conservation area, tokenized for open access."
+    },
+    {
+      "id": "KE-AGRI-INV-011",
+      "name": "Tokenized Agriculture Invoice — Rift Valley Foods 011",
+      "asset_type": "agri_invoice",
+      "issuer": "Rift Valley Foods",
+      "rules_profile": "KE",
+      "accreditation_required": false,
+      "us_persons_excluded": false,
+      "issuer_eu_authorized": false,
+      "summary": "Invoice-receivable financing for a Kenyan agri-processing supplier."
+    },
+    {
+      "id": "ZA-GOLD-003",
+      "name": "Tokenized Gold Receipt — Cape Mint Batch 003",
+      "asset_type": "commodity_receipt",
+      "issuer": "Cape Mint Digital",
+      "rules_profile": "ZA",
+      "accreditation_required": true,
+      "us_persons_excluded": false,
+      "issuer_eu_authorized": false,
+      "summary": "Warehouse receipt for allocated gold held with a South African custodian."
+    },
+    {
+      "id": "KE-INFRA-BND-2041",
+      "name": "Tokenized Infrastructure Bond 2041 (Mombasa Rail)",
+      "asset_type": "infra_bond",
+      "issuer": "Mombasa Rail Finance",
+      "rules_profile": "KE",
+      "accreditation_required": false,
+      "us_persons_excluded": false,
+      "issuer_eu_authorized": false,
+      "summary": "Tokenized infrastructure bond financing regional rail expansion."
+    }
+  ]
+}
