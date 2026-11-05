@@ -59,8 +59,11 @@ demo still runs end-to-end with no LLM key at all (deterministic mode).
 - [x] **M2 (Nov 4):** agent pipeline (deterministic mode + optional LLM
       rationale), audit trail persisted to `audit/trail.jsonl`, FastAPI API,
       plain-HTML dashboard — **31 tests green**
-- [ ] M3: live attestation end-to-end (needs a faucet-funded testnet key —
-      the API already falls back to labeled SIMULATED proofs)
+- [x] **M3 (Nov 5):** live attestation end-to-end, **verified onchain** —
+      schema registered, attestation recorded on Base Sepolia and decoded by
+      `verify.mjs` (tag `m3-onchain-live`). Judge-proof: `cd chain && npm run verify`,
+      or https://sepolia.basescan.org/tx/0x4e704a135eaca2d8d3dd17a56e9bd4666afbde30de86faf6f1a144a318270a5f
+      Full handoff: see `STATUS.md`.
 
 ## Quick start
 
