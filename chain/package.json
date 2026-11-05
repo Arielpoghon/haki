@@ -7,7 +7,8 @@
   "scripts": {
     "wallet": "node wallet.mjs",
     "schema": "node schema.mjs",
-    "attest": "node attest.mjs"
+    "attest": "node attest.mjs",
+    "verify": "node verify.mjs"
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "2.10.0",
