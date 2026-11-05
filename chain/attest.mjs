@@ -68,10 +68,10 @@ try {
       data: encodedData,
     },
   });
-  console.log('tx hash  :', tx.data.hash);
-  console.log('basescan :', EXPLORER_TX + tx.data.hash);
-
-  const attestationUID = await tx.wait();
+  const attestationUID = await tx.wait(); // wait() broadcasts + confirms (SDK design)
+  const txHash = tx.receipt?.hash ?? null;
+  console.log('tx hash  :', txHash ?? '(hash unavailable)');
+  if (txHash) console.log('basescan :', EXPLORER_TX + txHash);
   console.log('UID      :', attestationUID);
   console.log('easscan  :', EASSCAN_ATTESTATION + attestationUID);
 

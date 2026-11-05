@@ -30,8 +30,14 @@ try {
   const schemaUID = SchemaRegistry.getSchemaUID(HAKI_SCHEMA, RESOLVER, REVOCABLE);
   console.log('schema   :', HAKI_SCHEMA);
 
-  const existing = await registry.getSchema({ uid: schemaUID });
-  if (existing.uid === schemaUID) {
+  let alreadyRegistered = false;
+  try {
+    const existing = await registry.getSchema({ uid: schemaUID });
+    alreadyRegistered = existing.uid === schemaUID;
+  } catch {
+    alreadyRegistered = false; // EAS getSchema throws when not yet registered
+  }
+  if (alreadyRegistered) {
     console.log('status   : already registered — nothing to do');
   } else {
     const tx = await registry.register({
@@ -39,8 +45,8 @@ try {
       resolverAddress: RESOLVER,
       revocable: REVOCABLE,
     });
-    console.log('tx       :', tx.data.hash);
-    const registeredUID = await tx.wait();
+    const registeredUID = await tx.wait(); // wait() broadcasts + confirms (SDK design)
+    console.log('tx       :', tx.receipt?.hash ?? '(hash unavailable)');
     if (registeredUID !== schemaUID) {
       console.log('note     : tx returned UID', registeredUID);
     }
