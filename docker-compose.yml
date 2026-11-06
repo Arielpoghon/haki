@@ -1,0 +1,11 @@
+services:
+  haki:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - haki-audit:/app/audit   # persist the append-only audit trail
+    restart: unless-stopped
+
+volumes:
+  haki-audit:
