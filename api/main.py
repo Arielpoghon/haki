@@ -118,17 +118,22 @@ def audit_export_csv() -> FileResponse:
 
 
 def _audit_rows() -> list[dict]:
-    """One row per recorded run (last record wins for repeated run ids)."""
+    """One row per completed run, newest last. Only runs with a structured
+    run summary (the run_closed step) are rendered — legacy or torn records
+    without one are skipped, never shown as blank rows."""
     latest: dict[str, dict] = {}
     for record in tools.read_all_runs():
         rid = record.get("run_id", "")
-        if rid:
-            latest[rid] = record
+        if not rid:
+            continue
+        data = record.get("data") or {}
+        if not data.get("verdict"):  # not a run summary — skip
+            continue
+        latest[rid] = record
     rows = []
     for rid, rec in sorted(latest.items(), key=lambda kv: kv[1].get("at", "")):
         data = rec.get("data") or {}
         attestation = data.get("attestation") or {}
-        screening = data.get("screening") or {}
         rows.append({
             "timestamp": rec.get("at", ""),
             "run_id": rid,
@@ -139,7 +144,7 @@ def _audit_rows() -> list[dict]:
             "mode": data.get("agent_mode", ""),
             "attestation_uid": attestation.get("uid", ""),
             "attestation_mode": attestation.get("mode", ""),
-            "rule_ids": screening.get("rule_ids", []),
+            "rule_ids": data.get("rule_ids", []),
             "easscan_url": attestation.get("easscan_url", ""),
             "explorer_url": attestation.get("explorer_url", ""),
         })

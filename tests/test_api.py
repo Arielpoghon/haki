@@ -222,3 +222,26 @@ def test_logo_served(client):
     r = client.get("/static/haki-logo.png")
     assert r.status_code == 200
     assert r.headers["content-type"] == "image/png"
+
+
+def test_audit_skips_legacy_records_without_summary(client, tmp_path, monkeypatch):
+    """Pre-summary trail records must never render as blank rows."""
+    import json as _json
+
+    from api import tools
+
+    legacy = {"run_id": "run-legacy-1", "seq": 1, "tool": "load_asset",
+              "at": "2026-11-04T00:00:00Z", "detail": "old step without summary", "data": {}}
+    fake = tmp_path / "trail.jsonl"
+    fake.write_text(_json.dumps(legacy) + "\n", encoding="utf-8")
+    monkeypatch.setattr(tools, "AUDIT_FILE", fake)
+    r = client.get("/audit")
+    assert r.status_code == 200
+    assert "No runs recorded yet" in r.text
+
+
+def test_audit_shows_rules_hit(client):
+    client.post("/api/v1/screen", json={"asset_id": "KE-TB-2030", "wallet_label": "SANCT"})
+    r = client.get("/audit")
+    assert r.status_code == 200
+    assert "GLOBAL-SANCTIONS" in r.text  # rule ids now rendered, not "—"
