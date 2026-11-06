@@ -6,8 +6,16 @@ issues a **verifiable onchain attestation** (Ethereum Attestation Service on
 Base Sepolia) for every verdict: **ALLOW / RESTRICT / DENY**, with a written
 rationale and a full audit trail.
 
+**Who this is for in Africa:** tokenized-asset issuers in Kenya and South
+Africa who must prove every holder was screened, and the regulators who audit
+them — the demo's jurisdiction packs are framed around the builder's actual
+regulators (Kenya's **CMA**, South Africa's **FSCA**). Local integration is
+the design: each regulator's rules live in one YAML pack, and the audit view
+exports to CSV any compliance officer can open offline in Excel.
+
 Built for the Node Engine Hackathon (Real-World Assets track), Nov 12–14 2026,
-by Ariel Poghon (solo).
+by Ariel Poghon (solo). The business case, with sourced numbers, is in
+[docs/ONEPAGER.md](docs/ONEPAGER.md).
 
 > ⚠️ **Demo software.** Testnet only. Mock data, fictional issuers, simplified
 > rule profiles. Not legal advice, not production-ready.
@@ -68,14 +76,23 @@ demo still runs end-to-end with no LLM key at all (deterministic mode).
 ## Quick start
 
 ```bash
+./demo.sh          # venv + deps + tests + dashboard on http://127.0.0.1:8000
+```
+
+That single command does everything. By hand, it is:
+
+```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest -q     # the verdict matrix is the spec
 .venv/bin/uvicorn api.main:app --port 8000
-# dashboard: http://localhost:8000 · API docs: http://localhost:8000/docs
+# dashboard: http://localhost:8000 · audit view: http://localhost:8000/audit
+# API docs:  http://localhost:8000/docs
 ```
 
-Onchain attestation drill (optional, testnet only): see `chain/README.md`.
+Docker: `docker compose up` (keyless container; audit trail persisted on a
+volume). Onchain attestation drill (optional, testnet only): see
+`chain/README.md`.
 
 ## The verdict matrix (doubles as the test table)
 
@@ -132,11 +149,19 @@ audit/               # run log (gitignored) — every screening persists here
 
 | Method | Path | Purpose |
 |---|---|---|
+| GET | `/` | plain-HTML dashboard (no build step) |
+| GET | `/health`, `/api/v1/health` | liveness + version |
 | GET | `/api/v1/assets` | demo asset registry |
 | GET | `/api/v1/wallets` | demo wallets (no risk internals) |
 | GET | `/api/v1/rules` | all rule packs |
 | POST | `/api/v1/screen` | `{asset_id, wallet_label}` → verdict + rationale + audit trail + proof |
 | GET | `/api/v1/runs/{run_id}` | persisted audit steps for one run |
+| GET | `/audit` | read-only regulator view (all runs, rule ids, proofs) |
+| GET | `/audit/export.json`, `/audit/export.csv` | audit-trail exports |
+
+Performance: single screening (full rules evaluation, YAML packs loaded) runs
+in **~16 ms p50 / ~19 ms p99** (measured locally, 200 runs; the attestation
+call is the only network step).
 
 ## License
 
