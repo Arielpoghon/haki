@@ -173,8 +173,10 @@
     </fieldset>
 
     <h2>2 · Investor wallet</h2>
-    <label for="wallet" class="hint" style="margin-top:0">Wallet to screen against the selected asset's rule pack</label>
-    <select id="wallet"><option value="">Loading wallets…</option></select>
+    <fieldset style="border:0;padding:0;margin:0">
+      <legend style="position:absolute;left:-9999px">Choose the investor wallet to screen</legend>
+      <ul class="asset-list" id="wallets"><li class="empty">Loading wallets…</li></ul>
+    </fieldset>
 
     <button id="run" type="button" disabled>Run compliance check</button>
     <p class="hint" id="wallet-note"></p>
@@ -237,6 +239,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 let selectedAsset = null;
+let selectedWallet = null;
 const SYM = { ALLOW: "✓", RESTRICT: "!", DENY: "✕" };
 
 async function api(path, opts) {
@@ -276,16 +279,23 @@ function loadAssets() {
 
 function loadWallets() {
   api("/api/v1/wallets").then(({ wallets }) => {
-    const sel = $("wallet");
-    sel.innerHTML = wallets.map(w =>
-      `<option value="${w.label}">${w.label} — ${w.jurisdiction} · ${w.address.slice(0, 10)}…</option>`
-    ).join("");
-    sel.addEventListener("change", maybeEnable);
-    maybeEnable();
+    $("wallets").innerHTML = "";
+    wallets.forEach((w) => {
+      const li = document.createElement("li");
+      li.className = "asset";
+      const inputId = "wallet-" + w.label;
+      li.innerHTML =
+        `<input type="radio" name="wallet" id="${inputId}" value="${w.label}">` +
+        `<label for="${inputId}"><span class="id">${w.label}</span><br>` +
+        `<span class="meta">${w.jurisdiction} · ${w.address.slice(0, 10)}…</span></label>`;
+      const input = li.querySelector("input");
+      input.addEventListener("change", () => { selectedWallet = w.label; maybeEnable(); });
+      $("wallets").appendChild(li);
+    });
   }).catch(showError);
 }
 
-function maybeEnable() { $("run").disabled = !(selectedAsset && $("wallet").value); }
+function maybeEnable() { $("run").disabled = !(selectedAsset && selectedWallet); }
 
 function showError(err) {
   $("placeholder").hidden = true;
@@ -304,7 +314,7 @@ $("run").addEventListener("click", async () => {
     const run = await api("/api/v1/screen", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ asset_id: selectedAsset.id, wallet_label: $("wallet").value }),
+      body: JSON.stringify({ asset_id: selectedAsset.id, wallet_label: selectedWallet }),
     });
     render(run);
   } catch (err) {
