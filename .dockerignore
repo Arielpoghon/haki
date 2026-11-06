@@ -1,0 +1,13 @@
+.venv/
+.git/
+__pycache__/
+.pytest_cache/
+audit/
+chain/node_modules/
+chain/.env
+.env
+*.pyc
+docs/
+*.md
+JUDGING_READINESS.md
+STATUS.md
