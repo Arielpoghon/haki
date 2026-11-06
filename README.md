@@ -1,5 +1,9 @@
 # Haki — a compliance agent for tokenized real-world assets
 
+> **🔗 Live demo: https://haki-kver.onrender.com** — hosted instance, no keys,
+> proofs labeled SIMULATED; onchain evidence is the recorded drill txs below.
+> First visit after idle may take ~50 s (free-instance cold start).
+
 Haki (Swahili for *justice*) screens tokenized real-world assets (RWAs) and
 the wallets that want to hold them against a jurisdiction rules pack, and
 issues a **verifiable onchain attestation** (Ethereum Attestation Service on
