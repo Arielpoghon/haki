@@ -80,17 +80,29 @@ def read_run(run_id: str) -> dict | None:
     if not AUDIT_FILE.exists():
         return None
     steps: list[dict] = []
+    for record in _iter_trail():
+        if record.get("run_id") == run_id:
+            steps.append(record)
+    if not steps:
+        return None
+    return {"run_id": run_id, "steps": steps}
+
+
+def read_all_runs() -> list[dict]:
+    """Every persisted audit record (all runs, all steps), oldest first.
+    Tolerates torn lines — the audit view must never crash on bad input."""
+    if not AUDIT_FILE.exists():
+        return []
+    return list(_iter_trail())
+
+
+def _iter_trail():
     with AUDIT_FILE.open(encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
             if not line:
                 continue
             try:
-                record = json.loads(line)
+                yield json.loads(line)
             except ValueError:
                 continue  # a torn trailing line must never take the API down
-            if record.get("run_id") == run_id:
-                steps.append(record)
-    if not steps:
-        return None
-    return {"run_id": run_id, "steps": steps}

@@ -33,7 +33,9 @@ def client():
 def test_health(client):
     r = client.get("/api/v1/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok", "service": "haki"}
+    body = r.json()
+    assert body["status"] == "ok" and body["service"] == "haki"
+    assert "version" in body
 
 
 def test_dashboard_served(client):
@@ -169,3 +171,54 @@ def test_simulated_attestation_is_deterministic(client):
         uids.append(r.json()["attestation"]["uid"])
     assert uids[0] == uids[1]  # same payload -> same simulated proof
     assert uids[0].startswith("0x") and len(uids[0]) == 66
+
+
+# ------------------------------------------------------------------ reliability (2.2) + audit view (1.3)
+
+def test_health_alias_at_root(client):
+    r = client.get("/health")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "ok" and body["service"] == "haki"
+
+
+def test_audit_page_renders_runs(client):
+    # generate a run, then the regulator view must show it
+    client.post("/api/v1/screen", json={"asset_id": "KE-TB-2030", "wallet_label": "SANCT"})
+    r = client.get("/audit")
+    assert r.status_code == 200
+    assert "Audit view" in r.text
+    assert "KE-TB-2030" in r.text and "SANCT" in r.text and "DENY" in r.text
+
+
+def test_audit_export_json(client):
+    client.post("/api/v1/screen", json={"asset_id": "KE-TB-2030", "wallet_label": "CLEAN"})
+    r = client.get("/audit/export.json")
+    assert r.status_code == 200
+    rows = r.json()["runs"]
+    assert rows and all({"timestamp", "asset_id", "verdict", "attestation_uid"} <= set(r) for r in rows)
+
+
+def test_audit_export_csv(client):
+    client.post("/api/v1/screen", json={"asset_id": "KE-TB-2030", "wallet_label": "SANCT"})
+    r = client.get("/audit/export.csv")
+    assert r.status_code == 200
+    assert "text/csv" in r.headers["content-type"]
+    header = r.text.splitlines()[0]
+    assert header.startswith("timestamp,run_id,asset_id,wallet_label,verdict")
+    assert "DENY" in r.text
+
+
+def test_audit_page_empty_is_friendly(client, tmp_path, monkeypatch):
+    """No trail file at all -> readable page, not a 500."""
+    from api import tools
+    monkeypatch.setattr(tools, "AUDIT_FILE", tmp_path / "nope.jsonl")
+    r = client.get("/audit")
+    assert r.status_code == 200
+    assert "No runs recorded yet" in r.text
+
+
+def test_logo_served(client):
+    r = client.get("/static/haki-logo.png")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "image/png"

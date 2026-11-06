@@ -163,7 +163,25 @@ def run_compliance(asset_id: str, wallet_label: str) -> ComplianceRun:
         {"uid": record.uid, "mode": record.mode},
     )
 
-    step("run_closed", f"run complete — {asset_id} x {wallet_label} = {screening.verdict.value}")
+    step(
+        "run_closed",
+        f"run complete — {asset_id} x {wallet_label} = {screening.verdict.value}",
+        # run summary — the /audit regulator view renders one row per run from this
+        {
+            "asset_id": asset.id,
+            "wallet_label": wallet.label,
+            "verdict": screening.verdict.value,
+            "rules_profile": asset.rules_profile,
+            "agent_mode": mode,
+            "rule_ids": [r.rule_id for r in screening.rule_results if r.matched],
+            "attestation": {
+                "uid": record.uid,
+                "mode": record.mode,
+                "easscan_url": record.easscan_url,
+                "explorer_url": record.explorer_url,
+            },
+        },
+    )
 
     return ComplianceRun(
         run_id=run_id,
