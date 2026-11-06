@@ -91,8 +91,15 @@ python3 -m venv .venv
 ```
 
 Docker: `docker compose up` (keyless container; audit trail persisted on a
-volume). Onchain attestation drill (optional, testnet only): see
-`chain/README.md`.
+volume).
+
+**Deployed demo:** a keyless instance runs on Render — the dashboard and
+audit view are live, with attestation proofs labeled SIMULATED; the onchain
+evidence stays the recorded drill txs (see `chain/README.md`). Deploy your
+own in one click: Render → New → Blueprint → this repo (`render.yaml` is
+committed; the instance never holds chain keys). Note: free tier sleeps
+after ~15 min idle (~30 s cold start). Onchain attestation drill (optional,
+testnet only): see `chain/README.md`.
 
 ## The verdict matrix (doubles as the test table)
 

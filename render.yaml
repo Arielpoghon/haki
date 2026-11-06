@@ -1,0 +1,19 @@
+# Render Blueprint — deploy Haki with one click (New → Blueprint → this repo).
+# The deployed instance runs KEYLESS by design: mock fixtures, simulated
+# attestations, the recorded onchain drill links as evidence. Never put
+# ATTESTER_PK or chain/.env on a shared host.
+services:
+  - type: web
+    name: haki
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.9"
+      - key: HAKI_ATTEST_MODE
+        value: simulated   # attestation UI shows SIMULATED proofs on the cloud demo
+# Note: free tier sleeps after ~15 min idle (first hit wakes it, ~30s cold
+# start) and the audit trail is ephemeral — acceptable for a demo.
