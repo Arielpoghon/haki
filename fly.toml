@@ -1,0 +1,23 @@
+# Fly.io config — keyless demo deployment of Haki.
+# Deployed instance runs SIMULATED attestations by design; never put
+# ATTESTER_PK or chain/.env on a shared host. Free allowances:
+# shared-cpu-1x, auto-stop when idle, auto-start on request.
+app = "haki-rwa"
+primary_region = "jnb"   # Johannesburg — closest region to Kenya
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  HAKI_ATTEST_MODE = "simulated"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
