@@ -3,264 +3,355 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Haki — RWA Compliance Agent</title>
+<title>Haki — RWA compliance rail</title>
+<link rel="icon" type="image/png" href="/static/haki-logo.png">
+<meta name="description" content="Haki screens wallets against jurisdiction rules and attests every verdict onchain (Base Sepolia testnet).">
 <style>
+  /* ---------- design tokens ---------- */
   :root {
-    --bg: #0d1117; --panel: #161b22; --border: #2d333b;
-    --text: #e6edf3; --muted: #8b949e;
-    --allow: #2ea043; --restrict: #d29922; --deny: #f85149;
+    --bg: #0d1117;          /* page background */
+    --panel: #161b22;       /* card background */
+    --raised: #1c2129;      /* nested card */
+    --border: #30363d;
+    --text: #e6edf3;        /* 14.3:1 on --bg */
+    --muted: #9da7b3;       /* 7.4:1 on --bg, 5.6:1 on --panel */
     --accent: #58a6ff;
+    --allow: #15803d;       --allow-ink: #dcffe4;
+    --restrict: #b45309;    --restrict-ink: #ffedd5;
+    --deny: #b91c1c;        --deny-ink: #fee2e2;
+    --radius: 10px;
+    --maxw: 72ch;
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
+  /* ---------- accessibility: keyboard focus ---------- */
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; background: var(--accent);
+    color: #00253d; padding: 8px 14px; z-index: 10; font-weight: 600;
+  }
+  .skip-link:focus { left: 8px; top: 8px; }
+
+  /* ---------- layout ---------- */
   header {
-    display: flex; align-items: baseline; gap: 12px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
     padding: 16px 24px; border-bottom: 1px solid var(--border);
   }
-  header h1 { margin: 0; font-size: 20px; letter-spacing: 1px; }
-  header .tag { color: var(--muted); font-size: 13px; }
+  header img { width: 36px; height: 36px; border-radius: 8px; }
+  header h1 { margin: 0; font-size: 1.25rem; letter-spacing: 1px; }
+  header .tag { color: var(--muted); font-size: .85rem; }
   header .badge {
-    margin-left: auto; font-size: 12px; color: var(--muted);
-    border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+    margin-left: auto; font-size: .8rem; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px;
   }
   main {
-    display: grid; grid-template-columns: 380px 1fr;
-    gap: 20px; padding: 20px 24px; max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 400px 1fr; gap: 20px;
+    padding: 20px 24px; max-width: 1180px; margin: 0 auto;
   }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
   .panel {
     background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px;
+    border-radius: var(--radius); padding: 18px;
   }
-  .panel h2 {
-    margin: 0 0 12px; font-size: 12px; text-transform: uppercase;
-    letter-spacing: 1.2px; color: var(--muted);
+  h2 {
+    margin: 18px 0 10px; font-size: .8rem; text-transform: uppercase;
+    letter-spacing: 1.4px; color: var(--muted); font-weight: 600;
   }
+  h2:first-child { margin-top: 0; }
+  .intro { color: var(--muted); max-width: var(--maxw); margin: 0; }
+
+  /* ---------- asset picker ---------- */
+  .asset-list { list-style: none; margin: 0; padding: 0; }
   .asset {
-    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-    margin-bottom: 8px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
   }
-  .asset:hover { border-color: var(--accent); }
-  .asset.selected { border-color: var(--accent); background: #1c2635; }
-  .asset .id { font-weight: 600; font-size: 14px; }
-  .asset .meta { color: var(--muted); font-size: 12px; }
+  .asset input { position: absolute; opacity: 0; }
+  .asset label {
+    display: block; padding: 10px 12px; cursor: pointer; border-radius: 8px;
+  }
+  .asset label:hover { background: var(--raised); }
+  .asset input:checked + label { background: #1c2635; box-shadow: inset 0 0 0 1px var(--accent); }
+  .asset input:focus-visible + label { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .asset .id { font-weight: 600; font-size: .92rem; }
+  .asset .meta { color: var(--muted); font-size: .8rem; }
+
+  /* ---------- form ---------- */
   select, button {
     width: 100%; padding: 10px 12px; margin-top: 8px;
     background: var(--bg); color: var(--text);
-    border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: .95rem; font-family: inherit;
   }
   button {
     background: #1f6feb; border-color: #1f6feb; color: #fff;
     font-weight: 600; cursor: pointer; margin-top: 14px;
   }
   button:hover { background: #388bfd; }
-  button:disabled { opacity: .5; cursor: wait; }
-  .wallet-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  button:disabled { opacity: .55; cursor: wait; }
+  .hint { color: var(--muted); font-size: .8rem; margin-top: 6px; }
 
-  #verdict-card { display: none; }
-  .verdict-line { display: flex; align-items: center; gap: 14px; }
+  /* ---------- verdict card ---------- */
+  .verdict-line { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
   .verdict {
-    font-size: 26px; font-weight: 800; letter-spacing: 2px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 1.5rem; font-weight: 800; letter-spacing: 2px;
     padding: 8px 18px; border-radius: 8px;
   }
-  .verdict.ALLOW    { color: #fff; background: var(--allow); }
-  .verdict.RESTRICT { color: #fff; background: var(--restrict); }
-  .verdict.DENY     { color: #fff; background: var(--deny); }
-  .run-id { color: var(--muted); font-size: 12px; }
+  .verdict .sym { font-size: 1.2rem; }
+  .verdict.ALLOW    { background: var(--allow);    color: var(--allow-ink); }
+  .verdict.RESTRICT { background: var(--restrict); color: var(--restrict-ink); }
+  .verdict.DENY     { background: var(--deny);     color: var(--deny-ink); }
+  .run-id { color: var(--muted); font-size: .8rem; }
+  .pair { font-weight: 600; }
+  .pair code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem;
+  }
   .rationale {
     margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--accent);
-    background: var(--bg); border-radius: 0 8px 8px 0; font-size: 14px;
+    background: var(--raised); border-radius: 0 8px 8px 0; font-size: .95rem;
+    max-width: var(--maxw);
   }
-  .reasons { margin-top: 12px; font-size: 13px; }
-  .reasons li { margin-bottom: 4px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 16px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
   th { color: var(--muted); font-weight: 500; }
-  .pill { padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-  .pill.pass   { background: #12351c; color: #7ee787; }
+  .pill { padding: 1px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+  .pill.pass     { background: #12351c; color: #7ee787; }
   .pill.restrict { background: #3b2e0a; color: #e3b341; }
-  .pill.deny   { background: #4a1216; color: #ff7b72; }
-  .pill.miss   { background: transparent; color: var(--muted); }
-  .audit li { padding: 4px 0; font-size: 13px; }
+  .pill.deny     { background: #4a1216; color: #ff7b72; }
+  .pill.miss     { background: transparent; color: var(--muted); }
+  .reasons { margin-top: 12px; font-size: .85rem; }
+  .reasons ul { margin: 4px 0 10px; padding-left: 20px; }
+  .audit { padding-left: 22px; margin: 0; }
+  .audit li { padding: 4px 0; font-size: .85rem; }
   .audit .t { color: var(--accent); font-weight: 600; }
   .audit .d { color: var(--muted); }
-  .attest { margin-top: 16px; padding: 12px 14px; border: 1px dashed var(--border); border-radius: 8px; font-size: 13px; }
-  .attest code { color: var(--accent); word-break: break-all; }
-  .attest .sim { color: var(--restrict); font-weight: 600; }
+  .attest {
+    margin-top: 16px; padding: 12px 14px; border: 1px dashed var(--border);
+    border-radius: 8px; font-size: .85rem;
+  }
+  .attest code { color: var(--accent); word-break: break-all; font-size: .8rem; }
+  .attest .sim { color: #e3b341; font-weight: 600; }
+  .attest .onchain { color: #7ee787; font-weight: 600; }
   a { color: var(--accent); }
-  .empty { color: var(--muted); text-align: center; padding: 48px 0; }
-  .error { color: var(--deny); }
+  .empty { color: var(--muted); text-align: center; padding: 48px 16px; }
+  .error { color: #ff7b72; text-align: center; padding: 24px 16px; }
+
+  /* ---------- footer ---------- */
+  footer {
+    max-width: 1180px; margin: 0 auto; padding: 8px 24px 32px;
+    color: var(--muted); font-size: .82rem;
+  }
+  footer .audiences { margin-top: 10px; max-width: var(--maxw); }
+  footer .legal { margin-top: 10px; }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#results">Skip to results</a>
+
 <header>
-  <h1>⚖ HAKI</h1>
+  <img src="/static/haki-logo.png" alt="Haki logo — scales of justice and blockchain link">
+  <h1>HAKI</h1>
   <span class="tag">compliance agent for tokenized real-world assets</span>
   <span class="badge">Base Sepolia · testnet</span>
 </header>
 
 <main>
-  <div>
-    <div class="panel">
-      <h2>1 · Asset</h2>
-      <div id="assets"><div class="empty">loading…</div></div>
-      <h2 style="margin-top:16px">2 · Investor wallet</h2>
-      <select id="wallet"><option value="">loading…</option></select>
-      <div class="wallet-note" id="wallet-note"></div>
-      <button id="run" disabled>Run compliance check</button>
-    </div>
-  </div>
+  <!-- ============ left column: screening form ============ -->
+  <section class="panel" aria-labelledby="pick-title">
+    <p class="intro">Haki screens wallets against jurisdiction rules and attests every verdict onchain. Pick an asset and a wallet, then run the check.</p>
 
-  <div class="panel" id="verdict-card">
-    <div class="verdict-line">
-      <span class="verdict" id="verdict">—</span>
-      <div>
-        <div id="pair" style="font-weight:600"></div>
-        <div class="run-id" id="run-id"></div>
+    <h2 id="pick-title">1 · Asset</h2>
+    <fieldset style="border:0;padding:0;margin:0">
+      <legend style="position:absolute;left:-9999px">Choose an asset to screen</legend>
+      <ul class="asset-list" id="assets"><li class="empty">Loading assets…</li></ul>
+    </fieldset>
+
+    <h2>2 · Investor wallet</h2>
+    <label for="wallet" class="hint" style="margin-top:0">Wallet to screen against the selected asset's rule pack</label>
+    <select id="wallet"><option value="">Loading wallets…</option></select>
+
+    <button id="run" type="button" disabled>Run compliance check</button>
+    <p class="hint" id="wallet-note"></p>
+  </section>
+
+  <!-- ============ right column: results ============ -->
+  <section class="panel" id="results" aria-labelledby="results-title" aria-live="polite">
+    <h2 id="results-title">Result</h2>
+    <div id="placeholder" class="empty">
+      No runs yet — select an asset and a wallet, then run the compliance check.<br>
+      The rules engine decides. The agent explains. The chain proves.
+    </div>
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <div id="verdict-card" hidden>
+      <div class="verdict-line">
+        <span class="verdict" id="verdict"><span class="sym" aria-hidden="true"></span><span id="verdict-text"></span></span>
+        <div>
+          <div class="pair" id="pair"></div>
+          <div class="run-id" id="run-id"></div>
+        </div>
+        <span class="badge" id="agent-mode" style="margin-left:auto"></span>
       </div>
-      <span class="badge" id="agent-mode" style="margin-left:auto"></span>
-    </div>
 
-    <div class="rationale" id="rationale"></div>
+      <p class="rationale" id="rationale"></p>
 
-    <div class="grid2">
-      <div>
-        <h2>Rule results</h2>
-        <table>
-          <thead><tr><th>Rule</th><th>Pack</th><th>Outcome</th></tr></thead>
-          <tbody id="rules"></tbody>
-        </table>
-        <div class="reasons">
-          <strong>Deny reasons</strong>
-          <ul id="deny-reasons"></ul>
-          <strong>Restrict reasons</strong>
-          <ul id="restrict-reasons"></ul>
+      <div class="grid2">
+        <div>
+          <h2>Rule results</h2>
+          <table>
+            <thead><tr><th scope="col">Rule</th><th scope="col">Pack</th><th scope="col">Outcome</th></tr></thead>
+            <tbody id="rules"></tbody>
+          </table>
+          <div class="reasons">
+            <h2>Deny reasons</h2><ul id="deny-reasons"></ul>
+            <h2>Restrict reasons</h2><ul id="restrict-reasons"></ul>
+          </div>
+        </div>
+        <div>
+          <h2>Audit trail</h2>
+          <ol class="audit" id="audit"></ol>
         </div>
       </div>
-      <div>
-        <h2>Audit trail</h2>
-        <ol class="audit" id="audit"></ol>
-      </div>
+
+      <div class="attest" id="attest"></div>
     </div>
-
-    <div class="attest" id="attest"></div>
-  </div>
-
-  <div class="panel" id="placeholder">
-    <div class="empty">Select an asset and a wallet, then run the compliance check.<br>
-    The rules engine decides. The agent explains. The chain proves.</div>
-  </div>
+  </section>
 </main>
 
+<footer>
+  <div class="audiences">
+    <strong>For issuers:</strong> prove every holder was screened. &nbsp;
+    <strong>For platforms:</strong> gate listings and transfers. &nbsp;
+    <strong>For regulators:</strong> <a href="/audit">open the read-only audit view</a> and verify any verdict independently onchain.
+  </div>
+  <div class="legal">Demo software · Base Sepolia testnet · fictional data · not legal advice</div>
+</footer>
+
 <script>
+"use strict";
 const $ = (id) => document.getElementById(id);
 let selectedAsset = null;
+const SYM = { ALLOW: "✓", RESTRICT: "!", DENY: "✕" };
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
   if (!r.ok) {
     const body = await r.json().catch(() => ({}));
-    throw new Error(body.detail || r.statusText);
+    throw new Error(typeof body.detail === "string" ? body.detail : r.statusText);
   }
   return r.json();
 }
 
 function outcomePill(rr) {
   if (!rr.matched) return '<span class="pill miss">not applicable</span>';
-  if (rr.outcome === 'ALLOW' || rr.passed === true) return '<span class="pill pass">passed</span>';
-  if (rr.outcome === 'RESTRICT') return '<span class="pill restrict">RESTRICT</span>';
-  if (rr.outcome === 'DENY') return '<span class="pill deny">DENY</span>';
+  if (rr.outcome === "ALLOW" || rr.passed === true) return '<span class="pill pass">✓ passed</span>';
+  if (rr.outcome === "RESTRICT") return '<span class="pill restrict">! RESTRICT</span>';
+  if (rr.outcome === "DENY") return '<span class="pill deny">✕ DENY</span>';
   return '<span class="pill miss">info</span>';
 }
 
 function loadAssets() {
-  api('/api/v1/assets').then(({ assets }) => {
-    $('assets').innerHTML = '';
-    assets.forEach(a => {
-      const div = document.createElement('div');
-      div.className = 'asset';
-      div.innerHTML = `<div class="id">${a.id}</div>
-        <div class="meta">${a.name} · ${a.issuer} · profile ${a.rules_profile}</div>`;
-      div.onclick = () => {
-        document.querySelectorAll('.asset').forEach(el => el.classList.remove('selected'));
-        div.classList.add('selected');
-        selectedAsset = a;
-        maybeEnable();
-      };
-      $('assets').appendChild(div);
+  api("/api/v1/assets").then(({ assets }) => {
+    $("assets").innerHTML = "";
+    assets.forEach((a) => {
+      const li = document.createElement("li");
+      li.className = "asset";
+      const inputId = "asset-" + a.id;
+      li.innerHTML =
+        `<input type="radio" name="asset" id="${inputId}" value="${a.id}">` +
+        `<label for="${inputId}"><span class="id">${a.id}</span><br>` +
+        `<span class="meta">${a.name} · ${a.issuer} · profile ${a.rules_profile}</span></label>`;
+      const input = li.querySelector("input");
+      input.addEventListener("change", () => { selectedAsset = a; maybeEnable(); });
+      $("assets").appendChild(li);
     });
-  });
+  }).catch(showError);
 }
 
 function loadWallets() {
-  api('/api/v1/wallets').then(({ wallets }) => {
-    const sel = $('wallet');
+  api("/api/v1/wallets").then(({ wallets }) => {
+    const sel = $("wallet");
     sel.innerHTML = wallets.map(w =>
       `<option value="${w.label}">${w.label} — ${w.jurisdiction} · ${w.address.slice(0, 10)}…</option>`
-    ).join('');
-    sel.onchange = maybeEnable;
+    ).join("");
+    sel.addEventListener("change", maybeEnable);
     maybeEnable();
-  });
+  }).catch(showError);
 }
 
-function maybeEnable() {
-  $('run').disabled = !(selectedAsset && $('wallet').value);
+function maybeEnable() { $("run").disabled = !(selectedAsset && $("wallet").value); }
+
+function showError(err) {
+  $("placeholder").hidden = true;
+  const box = $("error");
+  box.hidden = false;
+  box.textContent = "Something went wrong: " + err.message + " — check that the API server is running.";
 }
 
-$('run').onclick = async () => {
-  $('run').disabled = true;
-  $('run').textContent = 'Agent working…';
+$("run").addEventListener("click", async () => {
+  $("run").disabled = true;
+  $("run").textContent = "Screening…";
+  $("error").hidden = true;
+  $("placeholder").hidden = false;
+  $("placeholder").textContent = "Agent working — loading rules, screening wallet, writing rationale…";
   try {
-    const run = await api('/api/v1/screen', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asset_id: selectedAsset.id, wallet_label: $('wallet').value }),
+    const run = await api("/api/v1/screen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ asset_id: selectedAsset.id, wallet_label: $("wallet").value }),
     });
     render(run);
   } catch (err) {
-    $('placeholder').innerHTML = `<div class="empty error">Error: ${err.message}</div>`;
+    $("placeholder").hidden = true;
+    showError(err);
   } finally {
-    $('run').disabled = false;
-    $('run').textContent = 'Run compliance check';
+    $("run").disabled = false;
+    $("run").textContent = "Run compliance check";
   }
-};
+});
 
 function render(run) {
-  $('placeholder').style.display = 'none';
-  $('verdict-card').style.display = 'block';
+  $("placeholder").hidden = true;
+  $("verdict-card").hidden = false;
   const s = run.screening;
 
-  const v = $('verdict');
-  v.textContent = s.verdict;
-  v.className = 'verdict ' + s.verdict;
-  $('pair').textContent = `${s.asset_id} × ${s.wallet_label}`;
-  $('run-id').textContent = run.run_id;
-  $('agent-mode').textContent = 'agent: ' + run.agent_mode;
+  const v = $("verdict");
+  v.className = "verdict " + s.verdict;
+  v.querySelector(".sym").textContent = SYM[s.verdict];
+  $("verdict-text").textContent = s.verdict;
+  $("pair").innerHTML = `<code>${s.asset_id}</code> × <code>${s.wallet_label}</code>`;
+  $("run-id").textContent = run.run_id;
+  $("agent-mode").textContent = "agent: " + run.agent_mode;
 
-  $('rationale').textContent = run.rationale;
+  $("rationale").textContent = run.rationale;
 
-  $('rules').innerHTML = s.rule_results.map(rr =>
+  $("rules").innerHTML = s.rule_results.map(rr =>
     `<tr><td>${rr.rule_id}</td><td>${rr.pack}</td><td>${outcomePill(rr)}</td></tr>`
-  ).join('');
+  ).join("");
 
-  $('deny-reasons').innerHTML = s.deny_reasons.map(x => `<li>${x}</li>`).join('') || '<li>none</li>';
-  $('restrict-reasons').innerHTML = s.restrict_reasons.map(x => `<li>${x}</li>`).join('') || '<li>none</li>';
+  $("deny-reasons").innerHTML = s.deny_reasons.map(x => `<li>${x}</li>`).join("") || "<li>none</li>";
+  $("restrict-reasons").innerHTML = s.restrict_reasons.map(x => `<li>${x}</li>`).join("") || "<li>none</li>";
 
-  $('audit').innerHTML = run.audit_trail.map(st =>
+  $("audit").innerHTML = run.audit_trail.map(st =>
     `<li><span class="t">${st.tool}</span> <span class="d">— ${st.detail}</span></li>`
-  ).join('');
+  ).join("");
 
   const a = run.attestation;
-  const simTag = a.mode === 'simulated'
+  const tag = a.mode === "simulated"
     ? '<span class="sim">SIMULATED</span> — '
-    : '<strong>ONCHAIN (Base Sepolia)</strong> — ';
-  const link = a.mode === 'simulated'
+    : '<span class="onchain">ONCHAIN · Base Sepolia</span> — ';
+  const links = a.mode === "simulated"
     ? `<code>${a.uid}</code>`
-    : `<a href="${a.explorer_url}" target="_blank">tx on Basescan</a> · <a href="${a.easscan_url}" target="_blank">view on easscan</a> <code>${a.uid}</code>`;
-  $('attest').innerHTML = `🔗 Attestation: ${simTag}${link}<br><span class="d" style="color:var(--muted)">${a.note}</span>`;
+    : `<a href="${a.explorer_url}" target="_blank" rel="noopener">tx on Basescan</a> · ` +
+      `<a href="${a.easscan_url}" target="_blank" rel="noopener">view on easscan</a> <code>${a.uid}</code>`;
+  $("attest").innerHTML =
+    `🔗 Attestation: ${tag}${links}<br><span class="d" style="color:var(--muted)">${a.note}</span>`;
 }
 
 loadAssets();
