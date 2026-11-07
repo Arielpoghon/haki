@@ -308,6 +308,7 @@ $("run").addEventListener("click", async () => {
   $("run").disabled = true;
   $("run").textContent = "Screening…";
   $("error").hidden = true;
+  $("verdict-card").hidden = true;  // hide the previous verdict while the new run executes
   $("placeholder").hidden = false;
   $("placeholder").textContent = "Agent working — loading rules, screening wallet, writing rationale…";
   try {
