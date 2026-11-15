@@ -1,6 +1,6 @@
 # HAKI EXPLAINED
 
-This is the plain-language guide for the builder (Ariel) — not the judges'
+This is the plain-language guide for the builders — not the judges'
 README. By the end you should be able to explain Haki to anyone, answer any
 question about it, and point to the exact file that does the job.
 
