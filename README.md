@@ -1,5 +1,9 @@
 # Haki — a compliance agent for tokenized real-world assets
 
+> 🏆 **1st place — Node Engine Hackathon 2026, Real-World Assets track**
+> (63.4 / 100, ahead of 7 teams; judged on Technical UX, Business/Market Fit
+> and Product design)
+
 > **🔗 Live demo: https://haki-kver.onrender.com** — hosted instance, no keys,
 > proofs labeled SIMULATED; onchain evidence is the recorded drill txs below.
 > First visit after idle may take ~50 s (free-instance cold start).
@@ -20,6 +24,17 @@ exports to CSV any compliance officer can open offline in Excel.
 Built for the Node Engine Hackathon (Real-World Assets track), Nov 12–14 2026,
 by Ariel Poghon (solo). The business case, with sourced numbers, is in
 [docs/ONEPAGER.md](docs/ONEPAGER.md).
+
+## Acknowledgments
+
+Thank you to the W3Node / Node Engine organizers, mentors and judges — and to
+the community that tested, broke and improved the demo.
+
+Built human-directed, AI-assisted: **Ariel Poghon** set the architecture,
+wrote the rule packs and made every product decision — the AI coding agent
+(ZCode, running GLM) wrote the implementation under that direction. The
+design principle of this project is the same one behind its build: the
+machine does the work; the human decides.
 
 > ⚠️ **Demo software.** Testnet only. Mock data, fictional issuers, simplified
 > rule profiles. Not legal advice, not production-ready.
