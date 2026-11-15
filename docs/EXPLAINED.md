@@ -1,4 +1,4 @@
-# HAKI EXPLAINED — read this to own the project
+# HAKI EXPLAINED
 
 This is the plain-language guide for the builder (Ariel) — not the judges'
 README. By the end you should be able to explain Haki to anyone, answer any
